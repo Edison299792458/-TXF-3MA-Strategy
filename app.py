@@ -148,7 +148,6 @@ header {visibility: hidden;}
     margin-bottom: 8px;
 }
 
-/* 空白日 */
 .calendar-empty {
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.05);
@@ -158,7 +157,6 @@ header {visibility: hidden;}
     margin-bottom: 10px;
 }
 
-/* 無交易日 */
 .calendar-card-neutral {
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.06);
@@ -169,7 +167,6 @@ header {visibility: hidden;}
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
 }
 
-/* 有交易日：固定色，不分深淺 */
 .calendar-card-pos {
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.07);
@@ -190,7 +187,6 @@ header {visibility: hidden;}
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
-/* 日曆文字 */
 .day-num {
     font-size: 0.88rem;
     font-weight: 700;
@@ -232,7 +228,6 @@ header {visibility: hidden;}
     color: #FFFFFF;
 }
 
-/* 右側週統計 */
 .week-side-card {
     background: linear-gradient(180deg, rgba(20,20,24,0.98) 0%, rgba(10,10,12,0.98) 100%);
     border: 1px solid rgba(255,255,255,0.06);
@@ -260,7 +255,6 @@ header {visibility: hidden;}
     color: #A1A1AA;
 }
 
-/* dataframe */
 div[data-testid="stDataFrame"] {
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 16px;
@@ -633,14 +627,23 @@ if selected_month is not None:
 
     month_df["exit_date"] = month_df["exit_time"].dt.date
 
-    daily_df = month_df.groupby("exit_date").agg(
+    # ==========================================================
+    # 這裡是本次唯一重點修改：
+    # 把所有「週六」績效併到前一天「週五」
+    # Python weekday(): Monday=0 ... Friday=4, Saturday=5, Sunday=6
+    # ==========================================================
+    month_df["display_date"] = month_df["exit_date"].apply(
+        lambda d: d - pd.Timedelta(days=1) if pd.Timestamp(d).weekday() == 5 else d
+    )
+
+    daily_df = month_df.groupby("display_date").agg(
         day_pnl=("export_net_pnl", "sum"),
         trades=("export_net_pnl", "size"),
         win_rate=("export_net_pnl", lambda s: (s.gt(0).mean() * 100) if len(s) > 0 else 0)
     ).reset_index()
 
     daily_map = {
-        row["exit_date"]: {
+        row["display_date"]: {
             "pnl": row["day_pnl"],
             "trades": int(row["trades"]),
             "win_rate": row["win_rate"]
@@ -651,7 +654,6 @@ if selected_month is not None:
     title_dt = datetime(year, month, 1)
     st.markdown(f"### {title_dt.strftime('%Y-%m')}")
 
-    # ===== 8 欄：日 一 二 三 四 五 六 + 週統計 =====
     col_widths = [1, 1, 1, 1, 1, 1, 1, 1.45]
 
     head_cols = st.columns(col_widths)
@@ -664,7 +666,6 @@ if selected_month is not None:
                 unsafe_allow_html=True
             )
 
-    # 第 8 欄故意留空，不顯示「六」或其他字
     with head_cols[7]:
         st.markdown(
             "<div class='calendar-side-head'>週統計</div>",
@@ -680,7 +681,6 @@ if selected_month is not None:
         week_pnl = 0
         week_days_with_trade = 0
 
-        # 前 7 欄：日期格
         for i, day in enumerate(week):
             with row_cols[i]:
                 if day.month != month:
@@ -713,7 +713,6 @@ if selected_month is not None:
                         </div>
                         """, unsafe_allow_html=True)
 
-        # 第 8 欄：週統計，固定放在六的右邊
         with row_cols[7]:
             pnl_cls = pnl_class_name(week_pnl)
             st.markdown(f"""
