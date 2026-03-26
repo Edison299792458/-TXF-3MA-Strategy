@@ -131,6 +131,7 @@ header {visibility: hidden;}
     margin-right: 8px;
 }
 
+/* 月曆 */
 .calendar-head {
     text-align: center;
     color: #A1A1AA;
@@ -157,21 +158,22 @@ header {visibility: hidden;}
     margin-bottom: 10px;
 }
 
+/* 注意：這裡已改成 賺錢紅、虧錢綠 */
 .cal-neutral {
     background: rgba(18,18,20,0.95);
 }
 
-.cal-pos-1 { background: rgba(16,185,129,0.14); }
-.cal-pos-2 { background: rgba(16,185,129,0.22); }
-.cal-pos-3 { background: rgba(16,185,129,0.32); }
+.cal-pos-1 { background: rgba(239,68,68,0.14); }
+.cal-pos-2 { background: rgba(239,68,68,0.22); }
+.cal-pos-3 { background: rgba(239,68,68,0.32); }
 
-.cal-neg-1 { background: rgba(239,68,68,0.14); }
-.cal-neg-2 { background: rgba(239,68,68,0.22); }
-.cal-neg-3 { background: rgba(239,68,68,0.32); }
+.cal-neg-1 { background: rgba(16,185,129,0.14); }
+.cal-neg-2 { background: rgba(16,185,129,0.22); }
+.cal-neg-3 { background: rgba(16,185,129,0.32); }
 
 .day-num {
     font-size: 0.88rem;
-    color: #E5E7EB;
+    color: #FFFFFF;
     margin-bottom: 8px;
     font-weight: 700;
 }
@@ -181,14 +183,16 @@ header {visibility: hidden;}
     font-weight: 800;
     line-height: 1.15;
     margin-bottom: 6px;
+    color: #FFFFFF !important;
 }
 
 .day-sub {
     font-size: 0.76rem;
-    color: #D1D5DB;
+    color: #FFFFFF !important;
     line-height: 1.35;
 }
 
+/* 右側週統計維持原本色調 */
 .week-side-card {
     background: linear-gradient(180deg, rgba(20,20,24,0.98) 0%, rgba(10,10,12,0.98) 100%);
     border: 1px solid rgba(255,255,255,0.06);
@@ -331,7 +335,9 @@ def load_data():
     df = df.dropna(subset=["exit_time"]).sort_values("exit_time").reset_index(drop=True)
     df["duration"] = df["exit_time"] - df["entry_time"]
 
-    df["日期文字"] = df["exit_time"].dt.strftime("%Y-%m-%d %H:%M")
+    # 這裡改成只顯示年月日
+    df["日期文字"] = df["exit_time"].dt.strftime("%Y-%m-%d")
+
     df["Hover顯示"] = df["export_net_pnl"].fillna(0).apply(
         lambda x: f"+{x:,.0f}" if x > 0 else (f"-{abs(x):,.0f}" if x < 0 else "0")
     )
@@ -363,10 +369,11 @@ latest_exit = df["exit_time"].max()
 ctrl_col1, ctrl_col2 = st.columns([1.1, 1.1])
 
 with ctrl_col1:
+    # 預設改成全部
     period_label = st.selectbox(
         "📆 選擇績效統計期間",
         ["近1個月", "近3個月", "近9個月", "近12個月", "全部"],
-        index=1
+        index=4
     )
 
 period_start = get_period_start(latest_exit, period_label)
@@ -560,15 +567,16 @@ with right_col:
         <div class="kpi-foot">進場至出場時間差</div>
     </div>
     """, unsafe_allow_html=True)
-    # ============================================
-# [09] 每日績效月曆（改成原生 Streamlit 版，不再用 HTML table）
+
+# ============================================
+# [09] 每日績效月曆
 # ============================================
 st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
 
+# 只保留主標題，刪掉副標題
 st.markdown("""
 <div class="panel">
     <div class="panel-title">每日績效月曆</div>
-    <div class="panel-subtitle">觀察每日損益、交易次數、勝率分布（月曆視圖）</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -601,8 +609,8 @@ if selected_month is not None:
     title_dt = datetime(year, month, 1)
     st.markdown(f"### {title_dt.strftime('%Y-%m')}")
 
-    # 星期標頭
-    weekday_names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    # 改成中文星期
+    weekday_names = ["日", "一", "二", "三", "四", "五", "六"]
     head_cols = st.columns(7)
     for i, day_name in enumerate(weekday_names):
         with head_cols[i]:
@@ -643,19 +651,19 @@ if selected_month is not None:
                             week_days_with_trade += 1
 
                             bg_cls = get_calendar_intensity_class(pnl, max_abs)
-                            text_cls = pnl_class_name(pnl)
 
+                            # 這裡故意不再讓字跟著盈虧變色，統一白字
                             st.markdown(f"""
                             <div class="calendar-card {bg_cls}">
                                 <div class="day-num">{day.day}</div>
-                                <div class="day-pnl {text_cls}">{format_currency_text(pnl)}</div>
-                                <div class="day-sub">{trades} trades</div>
-                                <div class="day-sub">{wr:.1f}%</div>
+                                <div class="day-pnl">{format_currency_text(pnl)}</div>
+                                <div class="day-sub">{trades} 筆交易</div>
+                                <div class="day-sub">勝率 {wr:.1f}%</div>
                             </div>
                             """, unsafe_allow_html=True)
 
             week_summary_list.append({
-                "week_name": f"Week {len(week_summary_list) + 1}",
+                "week_name": f"第 {len(week_summary_list) + 1} 週",
                 "pnl": week_pnl,
                 "days": week_days_with_trade
             })
@@ -667,12 +675,12 @@ if selected_month is not None:
             <div class="week-side-card">
                 <div class="week-side-title">{ws["week_name"]}</div>
                 <div class="week-side-pnl {pnl_cls}">{format_currency_text(ws["pnl"])}</div>
-                <div class="week-side-sub">{ws["days"]} days</div>
+                <div class="week-side-sub">{ws["days"]} 天</div>
             </div>
             """, unsafe_allow_html=True)
 
 # ============================================
-# [10] 最新 10 筆平倉紀錄明細（改用 dataframe，避免 HTML 原始碼問題）
+# [10] 最新 10 筆平倉紀錄明細
 # ============================================
 st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
 
