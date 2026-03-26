@@ -389,7 +389,7 @@ def load_data():
 # ============================================
 # [06] 頂部
 # ============================================
-st.markdown('<div class="dashboard-title">📈 三均線策略 --- 最新實單績效分析</div>', unsafe_allow_html=True)
+st.markdown('<div class="dashboard-title">📈 三均線策略 --- 實單績效分析</div>', unsafe_allow_html=True)
 
 if st.button("🔄 獲取最新資料 (重整)"):
     st.cache_data.clear()
