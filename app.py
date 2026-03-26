@@ -131,86 +131,128 @@ header {visibility: hidden;}
     margin-right: 8px;
 }
 
-/* 月曆 */
+/* ===== 月曆 ===== */
 .calendar-head {
     text-align: center;
-    color: #A1A1AA;
-    font-size: 0.88rem;
+    color: #C7CDD8;
+    font-size: 0.90rem;
     font-weight: 700;
     margin-bottom: 8px;
 }
 
-.calendar-card {
-    border-radius: 16px;
-    border: 1px solid rgba(255,255,255,0.08);
-    padding: 10px 10px;
-    min-height: 112px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
-    margin-bottom: 10px;
+.calendar-side-head {
+    text-align: center;
+    color: transparent;
+    font-size: 0.90rem;
+    font-weight: 700;
+    margin-bottom: 8px;
 }
 
+/* 空白日 */
 .calendar-empty {
     border-radius: 16px;
-    border: 1px solid rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.05);
+    min-height: 110px;
     padding: 10px 10px;
-    min-height: 112px;
     background: rgba(255,255,255,0.02);
     margin-bottom: 10px;
 }
 
-/* 注意：這裡已改成 賺錢紅、虧錢綠 */
-.cal-neutral {
-    background: rgba(18,18,20,0.95);
+/* 無交易日 */
+.calendar-card-neutral {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    min-height: 110px;
+    padding: 10px 10px;
+    background: rgba(12,14,20,0.92);
+    margin-bottom: 10px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
 }
 
-.cal-pos-1 { background: rgba(239,68,68,0.14); }
-.cal-pos-2 { background: rgba(239,68,68,0.22); }
-.cal-pos-3 { background: rgba(239,68,68,0.32); }
+/* 有交易日：固定色，不分深淺 */
+.calendar-card-pos {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.07);
+    min-height: 110px;
+    padding: 10px 10px;
+    background: linear-gradient(180deg, rgba(120,28,28,0.92) 0%, rgba(78,18,18,0.96) 100%);
+    margin-bottom: 10px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
 
-.cal-neg-1 { background: rgba(16,185,129,0.14); }
-.cal-neg-2 { background: rgba(16,185,129,0.22); }
-.cal-neg-3 { background: rgba(16,185,129,0.32); }
+.calendar-card-neg {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.07);
+    min-height: 110px;
+    padding: 10px 10px;
+    background: linear-gradient(180deg, rgba(6,78,59,0.92) 0%, rgba(4,52,40,0.96) 100%);
+    margin-bottom: 10px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
 
+/* 日曆文字 */
 .day-num {
     font-size: 0.88rem;
-    color: #FFFFFF;
-    margin-bottom: 8px;
     font-weight: 700;
+    margin-bottom: 10px;
+    color: #FFFFFF;
 }
 
-.day-pnl {
+.day-pnl-pos {
     font-size: 1.02rem;
     font-weight: 800;
     line-height: 1.15;
     margin-bottom: 6px;
-    color: #FFFFFF !important;
+    color: #FFD4D4;
 }
 
-.day-sub {
+.day-pnl-neg {
+    font-size: 1.02rem;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 6px;
+    color: #C7FFE8;
+}
+
+.day-sub-pos {
     font-size: 0.76rem;
-    color: #FFFFFF !important;
     line-height: 1.35;
+    color: #FFDCDC;
 }
 
-/* 右側週統計維持原本色調 */
+.day-sub-neg {
+    font-size: 0.76rem;
+    line-height: 1.35;
+    color: #D1FFEE;
+}
+
+.day-sub-neutral {
+    font-size: 0.76rem;
+    line-height: 1.35;
+    color: #FFFFFF;
+}
+
+/* 右側週統計 */
 .week-side-card {
     background: linear-gradient(180deg, rgba(20,20,24,0.98) 0%, rgba(10,10,12,0.98) 100%);
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 16px;
     padding: 12px 14px;
+    min-height: 110px;
     margin-bottom: 10px;
 }
 
 .week-side-title {
     font-size: 0.82rem;
     color: #E5E7EB;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
+    font-weight: 700;
 }
 
 .week-side-pnl {
     font-size: 1.2rem;
     font-weight: 800;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .week-side-sub {
@@ -218,7 +260,7 @@ header {visibility: hidden;}
     color: #A1A1AA;
 }
 
-/* dataframe 黑底優化 */
+/* dataframe */
 div[data-testid="stDataFrame"] {
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 16px;
@@ -278,18 +320,6 @@ def get_month_options(df):
         .tolist()
     )
 
-def get_calendar_intensity_class(val, max_abs):
-    if pd.isna(val) or val == 0 or max_abs <= 0:
-        return "cal-neutral"
-    ratio = abs(val) / max_abs
-    if ratio < 0.33:
-        level = 1
-    elif ratio < 0.66:
-        level = 2
-    else:
-        level = 3
-    return f"cal-pos-{level}" if val > 0 else f"cal-neg-{level}"
-
 def safe_direction_text(x):
     x = str(x).upper()
     if x == "LONG":
@@ -308,6 +338,26 @@ def calc_avg_duration_str(series):
     hours = total_seconds // 3600
     minutes = (total_seconds % 3600) // 60
     return f"{hours}小時 {minutes}分"
+
+def get_day_card_info(pnl_value):
+    if pd.isna(pnl_value) or pnl_value == 0:
+        return {
+            "card_class": "calendar-card-neutral",
+            "pnl_class": "day-sub-neutral",
+            "sub_class": "day-sub-neutral"
+        }
+    elif pnl_value > 0:
+        return {
+            "card_class": "calendar-card-pos",
+            "pnl_class": "day-pnl-pos",
+            "sub_class": "day-sub-pos"
+        }
+    else:
+        return {
+            "card_class": "calendar-card-neg",
+            "pnl_class": "day-pnl-neg",
+            "sub_class": "day-sub-neg"
+        }
 
 # ============================================
 # [05] 讀取資料
@@ -335,9 +385,7 @@ def load_data():
     df = df.dropna(subset=["exit_time"]).sort_values("exit_time").reset_index(drop=True)
     df["duration"] = df["exit_time"] - df["entry_time"]
 
-    # 這裡改成只顯示年月日
     df["日期文字"] = df["exit_time"].dt.strftime("%Y-%m-%d")
-
     df["Hover顯示"] = df["export_net_pnl"].fillna(0).apply(
         lambda x: f"+{x:,.0f}" if x > 0 else (f"-{abs(x):,.0f}" if x < 0 else "0")
     )
@@ -369,7 +417,6 @@ latest_exit = df["exit_time"].max()
 ctrl_col1, ctrl_col2 = st.columns([1.1, 1.1])
 
 with ctrl_col1:
-    # 預設改成全部
     period_label = st.selectbox(
         "📆 選擇績效統計期間",
         ["近1個月", "近3個月", "近9個月", "近12個月", "全部"],
@@ -527,7 +574,6 @@ with left_col:
 
     st.plotly_chart(fig_equity, use_container_width=True, config={"displayModeBar": False})
 
-    # 月份選擇器移到 Equity Curve 下方
     if len(month_options) > 0:
         selected_month = st.selectbox(
             "🗓️ 選擇月曆月份",
@@ -567,13 +613,11 @@ with right_col:
         <div class="kpi-foot">進場至出場時間差</div>
     </div>
     """, unsafe_allow_html=True)
-
-# ============================================
+    # ============================================
 # [09] 每日績效月曆
 # ============================================
 st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
 
-# 只保留主標題，刪掉副標題
 st.markdown("""
 <div class="panel">
     <div class="panel-title">每日績效月曆</div>
@@ -604,78 +648,79 @@ if selected_month is not None:
         for _, row in daily_df.iterrows()
     }
 
-    max_abs = max([abs(v["pnl"]) for v in daily_map.values()], default=0)
-
     title_dt = datetime(year, month, 1)
     st.markdown(f"### {title_dt.strftime('%Y-%m')}")
 
-    # 改成中文星期
+    # ===== 8 欄：日 一 二 三 四 五 六 + 週統計 =====
+    col_widths = [1, 1, 1, 1, 1, 1, 1, 1.45]
+
+    head_cols = st.columns(col_widths)
     weekday_names = ["日", "一", "二", "三", "四", "五", "六"]
-    head_cols = st.columns(7)
-    for i, day_name in enumerate(weekday_names):
+
+    for i in range(7):
         with head_cols[i]:
-            st.markdown(f"<div class='calendar-head'>{day_name}</div>", unsafe_allow_html=True)
+            st.markdown(
+                f"<div class='calendar-head'>{weekday_names[i]}</div>",
+                unsafe_allow_html=True
+            )
+
+    # 第 8 欄故意留空，不顯示「六」或其他字
+    with head_cols[7]:
+        st.markdown(
+            "<div class='calendar-side-head'>週統計</div>",
+            unsafe_allow_html=True
+        )
 
     cal = calendar.Calendar(firstweekday=6)
     weeks = cal.monthdatescalendar(year, month)
 
-    week_summary_list = []
+    for week_idx, week in enumerate(weeks, start=1):
+        row_cols = st.columns(col_widths)
 
-    body_col, side_col = st.columns([5.8, 1.3])
+        week_pnl = 0
+        week_days_with_trade = 0
 
-    with body_col:
-        for week in weeks:
-            cols = st.columns(7)
-            week_pnl = 0
-            week_days_with_trade = 0
+        # 前 7 欄：日期格
+        for i, day in enumerate(week):
+            with row_cols[i]:
+                if day.month != month:
+                    st.markdown("<div class='calendar-empty'></div>", unsafe_allow_html=True)
+                else:
+                    info = daily_map.get(day, None)
 
-            for i, day in enumerate(week):
-                with cols[i]:
-                    if day.month != month:
-                        st.markdown("<div class='calendar-empty'></div>", unsafe_allow_html=True)
+                    if info is None:
+                        st.markdown(f"""
+                        <div class="calendar-card-neutral">
+                            <div class="day-num">{day.day}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
                     else:
-                        info = daily_map.get(day, None)
+                        pnl = info["pnl"]
+                        trades = info["trades"]
+                        wr = info["win_rate"]
 
-                        if info is None:
-                            st.markdown(f"""
-                            <div class="calendar-card cal-neutral">
-                                <div class="day-num">{day.day}</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                        else:
-                            pnl = info["pnl"]
-                            trades = info["trades"]
-                            wr = info["win_rate"]
+                        week_pnl += pnl
+                        week_days_with_trade += 1
 
-                            week_pnl += pnl
-                            week_days_with_trade += 1
+                        style_info = get_day_card_info(pnl)
 
-                            bg_cls = get_calendar_intensity_class(pnl, max_abs)
+                        st.markdown(f"""
+                        <div class="{style_info['card_class']}">
+                            <div class="day-num">{day.day}</div>
+                            <div class="{style_info['pnl_class']}">{format_currency_text(pnl)}</div>
+                            <div class="{style_info['sub_class']}">{trades} 筆交易</div>
+                            <div class="{style_info['sub_class']}">勝率 {wr:.1f}%</div>
+                        </div>
+                        """, unsafe_allow_html=True)
 
-                            # 這裡故意不再讓字跟著盈虧變色，統一白字
-                            st.markdown(f"""
-                            <div class="calendar-card {bg_cls}">
-                                <div class="day-num">{day.day}</div>
-                                <div class="day-pnl">{format_currency_text(pnl)}</div>
-                                <div class="day-sub">{trades} 筆交易</div>
-                                <div class="day-sub">勝率 {wr:.1f}%</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-
-            week_summary_list.append({
-                "week_name": f"第 {len(week_summary_list) + 1} 週",
-                "pnl": week_pnl,
-                "days": week_days_with_trade
-            })
-
-    with side_col:
-        for ws in week_summary_list:
-            pnl_cls = pnl_class_name(ws["pnl"])
+        # 第 8 欄：週統計，固定放在六的右邊
+        with row_cols[7]:
+            pnl_cls = pnl_class_name(week_pnl)
             st.markdown(f"""
             <div class="week-side-card">
-                <div class="week-side-title">{ws["week_name"]}</div>
-                <div class="week-side-pnl {pnl_cls}">{format_currency_text(ws["pnl"])}</div>
-                <div class="week-side-sub">{ws["days"]} 天</div>
+                <div class="week-side-title">第 {week_idx} 週</div>
+                <div class="week-side-pnl {pnl_cls}">{format_currency_text(week_pnl)}</div>
+                <div class="week-side-sub">{week_days_with_trade} 天</div>
             </div>
             """, unsafe_allow_html=True)
 
